@@ -1,8 +1,6 @@
-CREATE DATABASE  IF NOT EXISTS `btl2_hcsdl` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `btl2_hcsdl`;
 -- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
--- Host: localhost    Database: btl2_hcsdl
+-- Host: 127.0.0.1    Database: btl2_hcsdl
 -- ------------------------------------------------------
 -- Server version	8.0.44
 
@@ -25,9 +23,9 @@ DROP TABLE IF EXISTS `chinhanh`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `chinhanh` (
-  `NaChiNhanh` char(3) NOT NULL,
-  `DiaChi` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`NaChiNhanh`)
+  `MaChiNhanh` char(3) NOT NULL,
+  `Diachi` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`MaChiNhanh`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -37,7 +35,6 @@ CREATE TABLE `chinhanh` (
 
 LOCK TABLES `chinhanh` WRITE;
 /*!40000 ALTER TABLE `chinhanh` DISABLE KEYS */;
-INSERT INTO `chinhanh` VALUES ('000',NULL),('001',NULL),('002',NULL);
 /*!40000 ALTER TABLE `chinhanh` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -51,8 +48,9 @@ DROP TABLE IF EXISTS `coupon`;
 CREATE TABLE `coupon` (
   `MaGiamGia` char(3) NOT NULL,
   `PhanTramGiam` double DEFAULT NULL,
-  `SoTienToiDa` int DEFAULT NULL,
-  PRIMARY KEY (`MaGiamGia`)
+  `SoTienGiamToiDa` int DEFAULT NULL,
+  PRIMARY KEY (`MaGiamGia`),
+  CONSTRAINT `Coupon_PhieuGiamGia` FOREIGN KEY (`MaGiamGia`) REFERENCES `phieugiamgia` (`MaGiamGia`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -66,29 +64,31 @@ LOCK TABLES `coupon` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `danhgiasanphamsach`
+-- Table structure for table `danhgia`
 --
 
-DROP TABLE IF EXISTS `danhgiasanphamsach`;
+DROP TABLE IF EXISTS `danhgia`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `danhgiasanphamsach` (
+CREATE TABLE `danhgia` (
   `MaNguoiMua` char(3) NOT NULL,
   `MaSach` char(3) NOT NULL,
   `NoiDung` varchar(45) DEFAULT NULL,
-  `NgayDanhGia` date DEFAULT NULL,
+  `Ngay` date DEFAULT NULL,
   `SoSao` int DEFAULT NULL,
-  PRIMARY KEY (`MaNguoiMua`,`MaSach`)
+  PRIMARY KEY (`MaNguoiMua`,`MaSach`),
+  CONSTRAINT `DanhGia_NguoiMua` FOREIGN KEY (`MaNguoiMua`) REFERENCES `nguoimua` (`MaNguoiMua`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `DanhGia_Sach` FOREIGN KEY (`MaNguoiMua`) REFERENCES `sach` (`MaSach`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `danhgiasanphamsach`
+-- Dumping data for table `danhgia`
 --
 
-LOCK TABLES `danhgiasanphamsach` WRITE;
-/*!40000 ALTER TABLE `danhgiasanphamsach` DISABLE KEYS */;
-/*!40000 ALTER TABLE `danhgiasanphamsach` ENABLE KEYS */;
+LOCK TABLES `danhgia` WRITE;
+/*!40000 ALTER TABLE `danhgia` DISABLE KEYS */;
+/*!40000 ALTER TABLE `danhgia` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -101,7 +101,8 @@ DROP TABLE IF EXISTS `diachi`;
 CREATE TABLE `diachi` (
   `MaNguoiMua` char(3) NOT NULL,
   `DiaChi` varchar(45) NOT NULL,
-  PRIMARY KEY (`MaNguoiMua`,`DiaChi`)
+  PRIMARY KEY (`MaNguoiMua`,`DiaChi`),
+  CONSTRAINT `DiaChi_NguoiMua` FOREIGN KEY (`MaNguoiMua`) REFERENCES `nguoimua` (`MaNguoiMua`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -122,12 +123,14 @@ DROP TABLE IF EXISTS `donhang`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `donhang` (
-  `MaDon` char(3) NOT NULL,
-  `TrangThai` varchar(45) DEFAULT NULL,
+  `MaDonHang` char(3) NOT NULL,
   `NgayTaoDon` date DEFAULT NULL,
-  `PhuongThucThanhToan` varchar(45) DEFAULT NULL,
+  `TrangThai` varchar(45) DEFAULT NULL,
+  `PhuongThuocThanhToan` varchar(45) DEFAULT NULL,
   `MaGiamGia` char(3) DEFAULT NULL,
-  PRIMARY KEY (`MaDon`)
+  PRIMARY KEY (`MaDonHang`),
+  KEY `DonHang_PhieuGiamGia` (`MaGiamGia`),
+  CONSTRAINT `DonHang_PhieuGiamGia` FOREIGN KEY (`MaGiamGia`) REFERENCES `phieugiamgia` (`MaGiamGia`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -148,10 +151,13 @@ DROP TABLE IF EXISTS `donhangbaogom`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `donhangbaogom` (
-  `MaDon` char(3) NOT NULL,
+  `MaDonHang` char(3) NOT NULL,
+  `MaSach` char(3) NOT NULL,
   `SoLuong` int DEFAULT NULL,
-  `MaSanPham` char(3) NOT NULL,
-  PRIMARY KEY (`MaSanPham`,`MaDon`)
+  PRIMARY KEY (`MaDonHang`,`MaSach`),
+  KEY `DonHangBaoGom_Sach` (`MaSach`),
+  CONSTRAINT `DonHangBaoGom_DonHang` FOREIGN KEY (`MaDonHang`) REFERENCES `donhang` (`MaDonHang`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `DonHangBaoGom_Sach` FOREIGN KEY (`MaSach`) REFERENCES `sach` (`MaSach`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -173,12 +179,14 @@ DROP TABLE IF EXISTS `donvanchuyen`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `donvanchuyen` (
   `MaDonVanChuyen` char(3) NOT NULL,
+  `MaDonHang` char(3) DEFAULT NULL,
+  `DiaChiNguoiNhan` varchar(45) DEFAULT NULL,
   `NgayGiao` date DEFAULT NULL,
   `NgayNhan` date DEFAULT NULL,
   `TinhTrang` varchar(45) DEFAULT NULL,
-  `DiachiNguoiNhan` varchar(45) DEFAULT NULL,
-  `MaDon` char(3) DEFAULT NULL,
-  PRIMARY KEY (`MaDonVanChuyen`)
+  PRIMARY KEY (`MaDonVanChuyen`),
+  KEY `DonVanChuyen_DonHang` (`MaDonHang`),
+  CONSTRAINT `DonVanChuyen_DonHang` FOREIGN KEY (`MaDonHang`) REFERENCES `donhang` (`MaDonHang`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -202,9 +210,9 @@ CREATE TABLE `duocvietboi` (
   `MaSach` char(3) NOT NULL,
   `MaTacGia` char(3) NOT NULL,
   PRIMARY KEY (`MaSach`,`MaTacGia`),
-  KEY `ma tac gia_idx` (`MaTacGia`),
-  CONSTRAINT `ma sach` FOREIGN KEY (`MaSach`) REFERENCES `sach` (`MaSach`),
-  CONSTRAINT `ma tac gia` FOREIGN KEY (`MaTacGia`) REFERENCES `tacgia` (`MaTacGia`)
+  KEY `DuocVietBoi_TacGia` (`MaTacGia`),
+  CONSTRAINT `DuocVietBoi_Sach` FOREIGN KEY (`MaSach`) REFERENCES `sach` (`MaSach`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `DuocVietBoi_TacGia` FOREIGN KEY (`MaTacGia`) REFERENCES `tacgia` (`MaTacGia`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -214,8 +222,33 @@ CREATE TABLE `duocvietboi` (
 
 LOCK TABLES `duocvietboi` WRITE;
 /*!40000 ALTER TABLE `duocvietboi` DISABLE KEYS */;
-INSERT INTO `duocvietboi` VALUES ('000','000'),('001','001'),('002','002'),('003','003'),('004','004');
 /*!40000 ALTER TABLE `duocvietboi` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `giaodonvanchuyen`
+--
+
+DROP TABLE IF EXISTS `giaodonvanchuyen`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `giaodonvanchuyen` (
+  `MaNguoiGiaoHang` char(3) NOT NULL,
+  `MaDonVanChuyen` char(3) NOT NULL,
+  PRIMARY KEY (`MaNguoiGiaoHang`,`MaDonVanChuyen`),
+  KEY `GiaoDonVanChuyen_DonVanChuyen` (`MaDonVanChuyen`),
+  CONSTRAINT `GiaoDonVanChuyen_DonVanChuyen` FOREIGN KEY (`MaDonVanChuyen`) REFERENCES `donvanchuyen` (`MaDonVanChuyen`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `GiaoDonVanChuyen_NguoiGiaoHang` FOREIGN KEY (`MaNguoiGiaoHang`) REFERENCES `nguoigiaohang` (`MaNguoiGiaoHang`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `giaodonvanchuyen`
+--
+
+LOCK TABLES `giaodonvanchuyen` WRITE;
+/*!40000 ALTER TABLE `giaodonvanchuyen` DISABLE KEYS */;
+/*!40000 ALTER TABLE `giaodonvanchuyen` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -227,9 +260,12 @@ DROP TABLE IF EXISTS `giohangbaogom`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `giohangbaogom` (
   `MaGioHang` char(3) NOT NULL,
-  `SoLuong` int DEFAULT NULL,
   `MaSanPham` char(3) NOT NULL,
-  PRIMARY KEY (`MaSanPham`,`MaGioHang`)
+  `SoLuong` int DEFAULT NULL,
+  PRIMARY KEY (`MaGioHang`,`MaSanPham`),
+  KEY `GioHang_Sach` (`MaSanPham`),
+  CONSTRAINT `GioHang_NguoiMua` FOREIGN KEY (`MaGioHang`) REFERENCES `nguoimua` (`MaGioHang`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `GioHang_Sach` FOREIGN KEY (`MaSanPham`) REFERENCES `sach` (`MaSach`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -243,6 +279,36 @@ LOCK TABLES `giohangbaogom` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `hoidap`
+--
+
+DROP TABLE IF EXISTS `hoidap`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `hoidap` (
+  `MaHoiDap` char(3) NOT NULL,
+  `MaNguoiMua` char(3) DEFAULT NULL,
+  `MaNguoiQuanTri` char(3) DEFAULT NULL,
+  `NoiDung` varchar(45) DEFAULT NULL,
+  `ThoiGian` date DEFAULT NULL,
+  PRIMARY KEY (`MaHoiDap`),
+  KEY `HoiDap_NguoiMua` (`MaNguoiMua`),
+  KEY `HoiDap_NguoiQuanTri` (`MaNguoiQuanTri`),
+  CONSTRAINT `HoiDap_NguoiMua` FOREIGN KEY (`MaNguoiMua`) REFERENCES `nguoimua` (`MaNguoiMua`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `HoiDap_NguoiQuanTri` FOREIGN KEY (`MaNguoiQuanTri`) REFERENCES `nguoiquantri` (`MaNguoiQuanTri`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `hoidap`
+--
+
+LOCK TABLES `hoidap` WRITE;
+/*!40000 ALTER TABLE `hoidap` DISABLE KEYS */;
+/*!40000 ALTER TABLE `hoidap` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `nguoidung`
 --
 
@@ -252,12 +318,14 @@ DROP TABLE IF EXISTS `nguoidung`;
 CREATE TABLE `nguoidung` (
   `MaNguoiDung` char(3) NOT NULL,
   `Email` varchar(45) DEFAULT NULL,
-  `Hoten` varchar(45) DEFAULT NULL,
-  `Sdt` varchar(45) DEFAULT NULL,
-  `MatKhau` char(3) DEFAULT NULL,
+  `HoTen` varchar(45) DEFAULT NULL,
+  `SDT` char(11) DEFAULT NULL,
+  `MatKhau` varchar(45) DEFAULT NULL,
   `GioiTinh` char(1) DEFAULT NULL,
   `VaiTro` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`MaNguoiDung`)
+  PRIMARY KEY (`MaNguoiDung`),
+  UNIQUE KEY `Email` (`Email`),
+  UNIQUE KEY `SDT` (`SDT`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -267,7 +335,6 @@ CREATE TABLE `nguoidung` (
 
 LOCK TABLES `nguoidung` WRITE;
 /*!40000 ALTER TABLE `nguoidung` DISABLE KEYS */;
-INSERT INTO `nguoidung` VALUES ('',NULL,NULL,NULL,NULL,NULL,NULL),('000','111@','Nguyen Van A','0111','111','M','ad'),('001','112@','Nguyen Van B','0112','112','F','ad'),('002','113@','Nguyen Van C','113','113','F','ad'),('003','114@','Nguyen Van D','114','114','M','ad'),('004','115@','Nguyen Van E','115','115','M','ad'),('005','116@','Nguyen Van F','116','116','F','cus'),('006','117@','Nguyen Van G','117','117','F','cus'),('007','118@','Nguyen Van H','118','118','M','cus'),('008','119@','Nguyen Van I','119','119','M','cus'),('009','120@','Nguyen Van J','120','120','F','cus'),('010','121@','Nguyen Van K','121','121','M','deli'),('011','122@','Nguyen Van L','122','122','M','deli'),('012','123@','Nguyen Van M','123','123','F','deli'),('013','124@','Nguyen Van N','124','124','M','deli'),('014','125@','Nguyen Van O','125','125','F','deli');
 /*!40000 ALTER TABLE `nguoidung` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -281,12 +348,12 @@ DROP TABLE IF EXISTS `nguoigiaohang`;
 CREATE TABLE `nguoigiaohang` (
   `MaNguoiGiaoHang` char(3) NOT NULL,
   `GiayPhepLaiXe` varchar(45) DEFAULT NULL,
-  `TenPhuongTienDangKy` varchar(45) DEFAULT NULL,
+  `PhuongTienDangKy` varchar(45) DEFAULT NULL,
   `BienSo` varchar(45) DEFAULT NULL,
   `PhamViHoatDong` varchar(45) DEFAULT NULL,
   `Luong` int DEFAULT NULL,
   PRIMARY KEY (`MaNguoiGiaoHang`),
-  CONSTRAINT `ma nguoi dung-nguoi giao hang` FOREIGN KEY (`MaNguoiGiaoHang`) REFERENCES `nguoidung` (`MaNguoiDung`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `NguoiGiaoHang_NguoiDung` FOREIGN KEY (`MaNguoiGiaoHang`) REFERENCES `nguoidung` (`MaNguoiDung`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -296,7 +363,6 @@ CREATE TABLE `nguoigiaohang` (
 
 LOCK TABLES `nguoigiaohang` WRITE;
 /*!40000 ALTER TABLE `nguoigiaohang` DISABLE KEYS */;
-INSERT INTO `nguoigiaohang` VALUES ('010',NULL,NULL,NULL,NULL,NULL),('011',NULL,NULL,NULL,NULL,NULL),('012',NULL,NULL,NULL,NULL,NULL),('013',NULL,NULL,NULL,NULL,NULL),('014',NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `nguoigiaohang` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -309,9 +375,10 @@ DROP TABLE IF EXISTS `nguoimua`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `nguoimua` (
   `MaNguoiMua` char(3) NOT NULL,
-  `maGioHang` char(3) NOT NULL,
+  `MaGioHang` char(3) NOT NULL,
   PRIMARY KEY (`MaNguoiMua`),
-  CONSTRAINT `ma nguoi dung-nguoi mua` FOREIGN KEY (`MaNguoiMua`) REFERENCES `nguoidung` (`MaNguoiDung`) ON DELETE CASCADE ON UPDATE CASCADE
+  UNIQUE KEY `MaGioHang_UNIQUE` (`MaGioHang`),
+  CONSTRAINT `MaNguoiMua_NguoiDung` FOREIGN KEY (`MaNguoiMua`) REFERENCES `nguoidung` (`MaNguoiDung`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -321,36 +388,33 @@ CREATE TABLE `nguoimua` (
 
 LOCK TABLES `nguoimua` WRITE;
 /*!40000 ALTER TABLE `nguoimua` DISABLE KEYS */;
-INSERT INTO `nguoimua` VALUES ('005','001'),('006','002'),('007','003'),('008','004'),('009','005');
 /*!40000 ALTER TABLE `nguoimua` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `nguoiquanly`
+-- Table structure for table `nguoiquantri`
 --
 
-DROP TABLE IF EXISTS `nguoiquanly`;
+DROP TABLE IF EXISTS `nguoiquantri`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `nguoiquanly` (
-  `MaNguoiQuanLy` char(3) NOT NULL,
+CREATE TABLE `nguoiquantri` (
+  `MaNguoiQuanTri` char(3) NOT NULL,
   `ThoiGianLamViec` varchar(45) DEFAULT NULL,
-  `NgayLamViec` varchar(45) DEFAULT NULL,
   `Luong` int DEFAULT NULL,
-  `NghiepVu` varchar(45) DEFAULT 'ad',
-  PRIMARY KEY (`MaNguoiQuanLy`),
-  CONSTRAINT `ma nguoi dung-nguoi quan ly` FOREIGN KEY (`MaNguoiQuanLy`) REFERENCES `nguoidung` (`MaNguoiDung`) ON DELETE CASCADE ON UPDATE CASCADE
+  `NghiepVu` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`MaNguoiQuanTri`),
+  CONSTRAINT `MaNguoiQuanTri_NguoiDung` FOREIGN KEY (`MaNguoiQuanTri`) REFERENCES `nguoidung` (`MaNguoiDung`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `nguoiquanly`
+-- Dumping data for table `nguoiquantri`
 --
 
-LOCK TABLES `nguoiquanly` WRITE;
-/*!40000 ALTER TABLE `nguoiquanly` DISABLE KEYS */;
-INSERT INTO `nguoiquanly` VALUES ('000',NULL,NULL,NULL,'ad'),('001',NULL,NULL,NULL,'ad'),('002',NULL,NULL,NULL,'ad'),('003',NULL,NULL,NULL,'ad'),('004',NULL,NULL,NULL,'ad');
-/*!40000 ALTER TABLE `nguoiquanly` ENABLE KEYS */;
+LOCK TABLES `nguoiquantri` WRITE;
+/*!40000 ALTER TABLE `nguoiquantri` DISABLE KEYS */;
+/*!40000 ALTER TABLE `nguoiquantri` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -361,12 +425,12 @@ DROP TABLE IF EXISTS `phanphoi`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `phanphoi` (
-  `MaChiNhanhGui` char(3) NOT NULL,
   `MaChiNhanhNhan` char(3) NOT NULL,
-  PRIMARY KEY (`MaChiNhanhGui`,`MaChiNhanhNhan`),
-  KEY `ma chi nhanh-gui_idx` (`MaChiNhanhNhan`),
-  CONSTRAINT `ma chi nhanh-gui` FOREIGN KEY (`MaChiNhanhNhan`) REFERENCES `chinhanh` (`NaChiNhanh`),
-  CONSTRAINT `ma chi nhanh-nhan` FOREIGN KEY (`MaChiNhanhGui`) REFERENCES `chinhanh` (`NaChiNhanh`)
+  `MaChiNhanhGui` char(3) NOT NULL,
+  PRIMARY KEY (`MaChiNhanhNhan`,`MaChiNhanhGui`),
+  KEY `PhanPhoi_ChiNhanhGui` (`MaChiNhanhGui`),
+  CONSTRAINT `PhanPhoi_ChiNhanhGui` FOREIGN KEY (`MaChiNhanhGui`) REFERENCES `chinhanh` (`MaChiNhanh`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `PhanPhoi_ChiNhanhNhan` FOREIGN KEY (`MaChiNhanhNhan`) REFERENCES `chinhanh` (`MaChiNhanh`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -376,7 +440,6 @@ CREATE TABLE `phanphoi` (
 
 LOCK TABLES `phanphoi` WRITE;
 /*!40000 ALTER TABLE `phanphoi` DISABLE KEYS */;
-INSERT INTO `phanphoi` VALUES ('000','001'),('001','002');
 /*!40000 ALTER TABLE `phanphoi` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -389,8 +452,8 @@ DROP TABLE IF EXISTS `phieugiamgia`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `phieugiamgia` (
   `MaGiamGia` char(3) NOT NULL,
-  `YeuCauToiThieu` int DEFAULT NULL,
-  `HanSuDung` date DEFAULT NULL,
+  `YeuCauToiThieu` varchar(45) DEFAULT NULL,
+  `ThoiHanSD` date DEFAULT NULL,
   `SoLuong` int DEFAULT NULL,
   PRIMARY KEY (`MaGiamGia`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -415,15 +478,17 @@ DROP TABLE IF EXISTS `sach`;
 CREATE TABLE `sach` (
   `MaSach` char(3) NOT NULL,
   `TenSach` varchar(45) DEFAULT NULL,
-  `GiaTien` int DEFAULT NULL,
-  `SoLuongTonKho` int DEFAULT NULL,
   `NgonNgu` varchar(45) DEFAULT NULL,
   `DichGia` varchar(45) DEFAULT NULL,
-  `HinhThuc` varchar(45) DEFAULT NULL,
-  `SoTrang` int DEFAULT NULL,
   `TenNhaXuatBan` varchar(45) DEFAULT NULL,
-  `TenNhaPhanPhoi` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`MaSach`)
+  `SoTrang` int DEFAULT NULL,
+  `NamTai` year DEFAULT NULL,
+  `Gia` int DEFAULT NULL,
+  `SoLuongTonKho` int DEFAULT NULL,
+  `MaChiNhanh` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`MaSach`),
+  KEY `Sach_ChiNhanh` (`MaChiNhanh`),
+  CONSTRAINT `Sach_ChiNhanh` FOREIGN KEY (`MaChiNhanh`) REFERENCES `chinhanh` (`MaChiNhanh`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -433,7 +498,6 @@ CREATE TABLE `sach` (
 
 LOCK TABLES `sach` WRITE;
 /*!40000 ALTER TABLE `sach` DISABLE KEYS */;
-INSERT INTO `sach` VALUES ('000','GiaiTich1',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),('001','Giaitich2',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),('002','DaiSoTuyenTinh',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),('003','HoaDaiCuong',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),('004','CauTrucDuLieu&GiaiThuat',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),('005','MoHinhHoaToanHoc',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `sach` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -459,38 +523,7 @@ CREATE TABLE `tacgia` (
 
 LOCK TABLES `tacgia` WRITE;
 /*!40000 ALTER TABLE `tacgia` DISABLE KEYS */;
-INSERT INTO `tacgia` VALUES ('000','A',NULL,NULL),('001','B',NULL,NULL),('002','C',NULL,NULL),('003','D',NULL,NULL),('004','E',NULL,NULL);
 /*!40000 ALTER TABLE `tacgia` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `taiban`
---
-
-DROP TABLE IF EXISTS `taiban`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `taiban` (
-  `MaSach` char(3) NOT NULL,
-  `MaSanPham` char(3) NOT NULL,
-  `LanTaiBan` int DEFAULT NULL,
-  `NamTaiBan` date DEFAULT NULL,
-  `MaChiNhanh` char(3) DEFAULT NULL,
-  PRIMARY KEY (`MaSach`,`MaSanPham`),
-  KEY `ma chi nhanh-cung cap_idx` (`MaChiNhanh`),
-  CONSTRAINT `ma chi nhanh-cung cap` FOREIGN KEY (`MaChiNhanh`) REFERENCES `chinhanh` (`NaChiNhanh`),
-  CONSTRAINT `ma sach-taiban` FOREIGN KEY (`MaSach`) REFERENCES `sach` (`MaSach`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `taiban`
---
-
-LOCK TABLES `taiban` WRITE;
-/*!40000 ALTER TABLE `taiban` DISABLE KEYS */;
-INSERT INTO `taiban` VALUES ('000','000',2,NULL,NULL),('000','001',1,NULL,NULL),('001','002',2,NULL,NULL),('001','003',1,NULL,NULL),('002','004',2,NULL,NULL),('002','005',1,NULL,NULL),('003','006',2,NULL,NULL),('003','007',1,NULL,NULL),('004','008',2,NULL,NULL),('004','009',1,NULL,NULL),('004','010',2,NULL,NULL),('005','011',1,NULL,NULL),('005','012',2,NULL,NULL);
-/*!40000 ALTER TABLE `taiban` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -501,10 +534,10 @@ DROP TABLE IF EXISTS `theloai`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `theloai` (
-  `MaPhanLoai` char(3) NOT NULL,
+  `MaTheLoai` char(3) NOT NULL,
   `TenPhanLoai` varchar(45) DEFAULT NULL,
-  `ThongTinMoTa` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`MaPhanLoai`)
+  `ThongtinMoTa` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`MaTheLoai`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -514,31 +547,7 @@ CREATE TABLE `theloai` (
 
 LOCK TABLES `theloai` WRITE;
 /*!40000 ALTER TABLE `theloai` DISABLE KEYS */;
-INSERT INTO `theloai` VALUES ('000','xa hoi',NULL),('001','tu nhien',NULL);
 /*!40000 ALTER TABLE `theloai` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `thongtingiaohang`
---
-
-DROP TABLE IF EXISTS `thongtingiaohang`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `thongtingiaohang` (
-  `MaNguoiGiao` char(3) NOT NULL,
-  `MaDonVanChuyen` char(3) NOT NULL,
-  PRIMARY KEY (`MaNguoiGiao`,`MaDonVanChuyen`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `thongtingiaohang`
---
-
-LOCK TABLES `thongtingiaohang` WRITE;
-/*!40000 ALTER TABLE `thongtingiaohang` DISABLE KEYS */;
-/*!40000 ALTER TABLE `thongtingiaohang` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -549,12 +558,12 @@ DROP TABLE IF EXISTS `thuoctheloai`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `thuoctheloai` (
-  `MaPhanLoai` char(3) NOT NULL,
   `MaSach` char(3) NOT NULL,
-  PRIMARY KEY (`MaPhanLoai`,`MaSach`),
-  KEY `ma sach_idx` (`MaSach`),
-  CONSTRAINT `ma phan loai` FOREIGN KEY (`MaPhanLoai`) REFERENCES `theloai` (`MaPhanLoai`),
-  CONSTRAINT `ma sach-thuoc the loai` FOREIGN KEY (`MaSach`) REFERENCES `sach` (`MaSach`)
+  `MaTheLoai` char(3) NOT NULL,
+  PRIMARY KEY (`MaSach`,`MaTheLoai`),
+  KEY `ThuocTheLoai_TheLoai` (`MaTheLoai`),
+  CONSTRAINT `ThuocTheLoai_Sach` FOREIGN KEY (`MaSach`) REFERENCES `sach` (`MaSach`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ThuocTheLoai_TheLoai` FOREIGN KEY (`MaTheLoai`) REFERENCES `theloai` (`MaTheLoai`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -564,34 +573,7 @@ CREATE TABLE `thuoctheloai` (
 
 LOCK TABLES `thuoctheloai` WRITE;
 /*!40000 ALTER TABLE `thuoctheloai` DISABLE KEYS */;
-INSERT INTO `thuoctheloai` VALUES ('000','000'),('000','001'),('000','002'),('000','003'),('000','004'),('000','005');
 /*!40000 ALTER TABLE `thuoctheloai` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `tinnhanhoidap`
---
-
-DROP TABLE IF EXISTS `tinnhanhoidap`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `tinnhanhoidap` (
-  `MaTinNhan` char(3) NOT NULL,
-  `NoiDung` varchar(45) DEFAULT NULL,
-  `ThoiGian` date DEFAULT NULL,
-  `MaNguoiMua` char(3) DEFAULT NULL,
-  `MaNguoiQuanLy` char(3) DEFAULT NULL,
-  PRIMARY KEY (`MaTinNhan`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `tinnhanhoidap`
---
-
-LOCK TABLES `tinnhanhoidap` WRITE;
-/*!40000 ALTER TABLE `tinnhanhoidap` DISABLE KEYS */;
-/*!40000 ALTER TABLE `tinnhanhoidap` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -604,7 +586,8 @@ DROP TABLE IF EXISTS `voucher`;
 CREATE TABLE `voucher` (
   `MaGiamGia` char(3) NOT NULL,
   `GiaTri` int DEFAULT NULL,
-  PRIMARY KEY (`MaGiamGia`)
+  PRIMARY KEY (`MaGiamGia`),
+  CONSTRAINT `Voucher_PhieuGiamGia` FOREIGN KEY (`MaGiamGia`) REFERENCES `phieugiamgia` (`MaGiamGia`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -626,4 +609,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-19 18:22:24
+-- Dump completed on 2025-11-20  0:54:08
