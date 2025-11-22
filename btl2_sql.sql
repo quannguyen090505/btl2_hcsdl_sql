@@ -152,6 +152,30 @@ LOCK TABLES `donhang` WRITE;
 INSERT INTO `donhang` VALUES ('000','000','2025-11-22','Waiting for checkout','Waiting for checkout',0,NULL,0),('001','006','2025-11-22','Checked out','cash',230000,NULL,0),('002','009','2025-11-23','Waiting for checkout','Waiting for checkout',200000,NULL,0),('003','010','2025-11-25','Waiting for checkout','Waiting for checkout',770000,NULL,0),('004','007','2025-11-25','checked out','cash',80000,NULL,0),('005','008','2025-11-25','checked out','banking',600000,NULL,0),('006','007','2025-11-26','Waiting for checkout','Waiting for checkout',65000,NULL,NULL),('007','006','2025-11-27','checked out','banking',105000,NULL,0),('008','008','2025-11-27','checked out','banking',475000,NULL,0);
 /*!40000 ALTER TABLE `donhang` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `LimitedOrderAtATime` BEFORE INSERT ON `donhang` FOR EACH ROW begin
+	declare checking int default 0;
+    
+	select count(*) into checking
+    from DonHang
+    where MaNguoiMua=new.MaNguoiMua and TrangThai='Waiting for checkout'
+    order by MaDonHang desc;
+    if(checking!=0) then signal sqlstate '45000' set message_text='customer is checking out multi order at the same time';
+    end if;
+end */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `donhangbaogom`
@@ -181,6 +205,29 @@ LOCK TABLES `donhangbaogom` WRITE;
 INSERT INTO `donhangbaogom` VALUES ('002','008',1,50000),('002','009',1,50000),('003','010',7,385000),('005','005',1,300000),('006','003',1,65000);
 /*!40000 ALTER TABLE `donhangbaogom` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `CalculatePrice` BEFORE INSERT ON `donhangbaogom` FOR EACH ROW begin
+	declare unit_price int;
+    select Gia into unit_price
+    from Sach
+    where MaSach=new.MaSach;
+    SET new.TongGia = unit_price * NEW.SoLuong;
+    update DonHang set TongGia=TongGia+new.TongGia where MaDonHang=new.MaDonHang; 
+
+end */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `donvanchuyen`
@@ -293,6 +340,29 @@ LOCK TABLES `giohangbaogom` WRITE;
 INSERT INTO `giohangbaogom` VALUES ('006','008',1),('007','005',7),('007','009',7),('008','002',5),('009','008',2),('009','010',2),('010','007',7);
 /*!40000 ALTER TABLE `giohangbaogom` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `AmountOfProductInCart` BEFORE INSERT ON `giohangbaogom` FOR EACH ROW begin
+	declare amount int default 0;
+    
+	select SUM(SoLuong) into amount
+    from GioHangBaoGom
+    where MaGioHang=new.MaGioHang;
+    if(amount+new.SoLuong>1000) then signal sqlstate '45000' set message_text='the amount of book in customer cart is overflow';
+    end if;
+end */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `hoidap`
@@ -628,6 +698,672 @@ LOCK TABLES `voucher` WRITE;
 INSERT INTO `voucher` VALUES ('006',50000),('007',100000),('008',25000),('009',15000),('010',20000);
 /*!40000 ALTER TABLE `voucher` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping routines for database 'btl2_hcsdl'
+--
+/*!50003 DROP PROCEDURE IF EXISTS `AddingBookFromCartIntoOrder` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AddingBookFromCartIntoOrder`(in cus_id char(3), in book_id char(3))
+begin
+	declare cart_id char(3);
+    declare amount int;
+    declare order_id char(3);
+    declare CustomerIdValidate int default 0;
+    declare BookIdValidate int default 0;
+    declare Cus_BookValidate int default 0;
+    declare Cus_OrderValidate int default 0;
+   -- -------------------------------------------------------   
+    declare exit handler for 60022 -- ma id nguoi mua ko ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='customer id is invalid';
+    end;
+    
+    declare exit handler for 60023 -- ma id sach ko ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='book id is invalid';
+    end;
+    
+    declare exit handler for 60024 -- khong ton tai quan he cus-book
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='book has not been add to customer cart';
+    end;
+	-- -------------------------------------------------------
+    select count(MaNguoiMua) into CustomerIdValidate
+    from NguoiMua
+    where MaNguoiMua=cus_id;
+    if(CustomerIdValidate=0) then signal sqlstate '45000' set mysql_errno=60022;
+    else 
+		begin
+		select MaGioHang into cart_id
+		from NguoiMua
+		where MaNguoiMua=cus_id;
+        
+        select MaDonHang into order_id
+        from DonHang
+        where MaNguoiMua=cus_id
+        order by MaDonHang desc
+        limit 1;
+		end;
+	end if;
+    
+    select count(MaSach) into BookIdValidate
+    from Sach
+    where MaSach=book_id;
+    if(BookIdValidate=0) then signal sqlstate '45000' set mysql_errno=60023;
+    end if;
+    
+    select count(*) into Cus_BookValidate
+    from GioHangBaoGom
+    where MaGioHang=cart_id and MaSanPham=book_id;
+    if(Cus_BookValidate=0) then signal sqlstate '45000' set mysql_errno=60024;
+    else
+    begin
+    select SoLuong into amount
+    from GioHangBaoGom
+    where MaGioHang=cart_id and MaSanPham=book_id;
+    end;
+    end if;
+    
+	start transaction;
+    select count(*) into Cus_OrderValidate
+    from DonHang as D
+    where D.MaNguoiMua=cus_id and D.TrangThai!='Checked out'
+    order by MaDonHang desc
+    limit 1;
+    if(Cus_OrderValidate=0) then call CreateOrder(cus_id, order_id);
+	end if;
+    insert into DonHangBaoGom(MaDonHang,MaSach,SoLuong)
+    values (order_id,book_id,amount);
+    commit;
+    
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `CheckingOutOrderIntoDelivery` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CheckingOutOrderIntoDelivery`(in cus_id char(3), in paymemt varchar(45))
+begin
+    declare CustomerIdValidate int default 0;
+    declare Cus_OrderValidate int default 0;
+    declare order_id char(3);
+    declare cart_id char(3);
+    declare deliID char(3);
+    declare deliCODE int;
+    declare deliMAX int default 0;
+    declare OrderAddr varchar(45);
+   -- -------------------------------------------------------   
+    declare exit handler for 60025 -- ma id nguoi mua ko ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='customer id is invalid';
+    end;
+	declare exit handler for 60026 -- relationship nguoimua_donhang khong ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='customer has not ordered';
+    end;
+	-- -------------------------------------------------------
+    select count(MaNguoiMua) into CustomerIdValidate
+    from NguoiMua
+    where MaNguoiMua=cus_id;
+    
+    if(CustomerIdValidate=0) then signal sqlstate '45000' set mysql_errno=60025;
+	end if;
+	
+    select count(*) into Cus_OrderValidate
+    from DonHang
+    where MaNguoiMua=cus_id and TrangThai= 'Waiting for checkout'
+    order by MaDonHang desc
+    limit 1;
+    if(Cus_OrderValidate=0) then signal sqlstate '45000' set mysql_errno=60026;
+	end if;
+    
+    select MaDonHang into order_id
+    from DonHang
+    where MaNguoiMua=cus_id and TrangThai= 'Waiting for checkout'
+    order by MaDonHang desc
+    limit 1;
+    
+    select MaGioHang into cart_id
+    from NguoiMua
+    where MaNguoiMua=cus_id;
+    
+    select DiaChi into OrderAddr
+    from DiaChi
+    where MaNguoiMua=cus_id;
+    
+	start transaction;
+    select count(*) into deliCODE
+    from DonVanChuyen;
+    select max(MaDonVanCHuyen) into deliMAX
+    from DonVanChuyen;
+    if(deliCODE<=deliMAX) then set deliCODE=deliMAX+1;
+    end if;
+    set deliId=lpad(deliCODE,3,'0');
+    insert into DonVanChuyen
+    values (deliId ,order_id,OrderAddr, curdate(),curdate(),'Delivering');
+    
+    update Sach as S join DonHangBaoGom as D on S.MaSach=D.MaSach
+    set S.SoLuongTonKho=S.SoLuongTonKho-D.SoLuong
+    where D.MaDonHang=order_id;
+    update DonHang
+    set TrangThai='Checked out'
+    where MaNguoiMua=cus_id
+	order by MaDonHang desc
+    limit 1;
+    update DonHang
+    set PhuongThucThanhToan=paymemt
+    where MaNguoiMua=cus_id
+	order by MaDonHang desc
+    limit 1;
+    
+    delete from GioHangBaoGom 
+    where MaGioHang=cart_id and MaSanPham in (select MaSach from DonHangBaoGom where MaDonHang=order_id);
+    delete from DonHangBaoGom
+    where MaDonHang=order_id;
+    commit;
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `CreateOrder` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateOrder`(in cus_id char(3), out order_id char(3))
+begin
+    declare CustomerIdValidate int default 0;
+    declare OrderId char(3);
+    declare orderCODE int;
+    declare orderMAX int default 0;
+   -- -------------------------------------------------------   
+    declare exit handler for 60019 -- ma id nguoi mua ko ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='customer id is invalid';
+    end;
+	-- -------------------------------------------------------
+    select count(MaNguoiMua) into CustomerIdValidate
+    from NguoiMua
+    where MaNguoiMua=cus_id;
+    if(CustomerIdValidate=0) then signal sqlstate '45000' set mysql_errno=60019;
+	end if;
+    
+	start transaction;
+    select count(*) into orderCODE
+    from DonHang;
+    select max(MaDonHang) into orderMAX
+    from DonHang;
+    if(orderCODE<=orderMAX) then set orderCODE=OrderMAX+1;
+    end if;
+    set OrderId=lpad(orderCODE,3,'0');
+	set order_id=OrderId;
+    insert into DonHang(MaDonHang,MaNguoiMua,NgayTaoDon,TrangThai,PhuongThucThanhToan,TongGia,MaGiamGia,GiaCuoiCung)
+    values (OrderId ,cus_id, curdate(),'Waiting for checkout','Waiting for checkout', 0, null, 0);
+    commit;
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `CreateOrder1` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CreateOrder1`(in cus_id char(3))
+begin
+    declare tmp char(3);
+    call CreateOrder('000',tmp );
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `CustomerAddingBookToCart` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CustomerAddingBookToCart`(in cus_id char(3), in book_id char(3), in amount int )
+begin
+	declare inStock int;
+    declare cart_id char(3);
+    declare CusIdValidate int default 0;
+    declare bookIdValidate int default 0;
+    declare Cus_BookValidate int default 0;
+    declare InCart int default 0;
+    -- -------------------------------------------------------
+	declare exit handler for 60001 -- so luong san pham co san = 0
+	begin
+	rollback;
+	signal sqlstate '45000' set message_text='Product is out of stock';
+	end;
+    
+	declare exit handler for 60002 -- so luong san pham co san < so luong san pham lua chon
+    begin
+    signal sqlstate '45000' set message_text='the selected amount of products is greater than stock';
+    end;
+    
+	declare exit handler for 60003 -- so luong san pham lua chon <1
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='the selected amount of  product is invalid';
+    end;
+    
+    declare exit handler for 60004 -- ma id nguoi mua ko ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='customer id is invalid';
+    end;
+    
+    declare exit handler for 60005 -- ma id sach ko ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='book id is invalid';
+    end;
+	-- -------------------------------------------------------
+	select count(MaNguoiMua) into CusIdValidate
+    from NguoiMua
+    where cus_id=MaNguoiMua;
+    if(cusIdValidate=0) then signal sqlstate '45000' set mysql_errno=60004;
+    end if;
+    select  MaGioHang into cart_id 
+	from NguoiMua
+	where cus_id=MaNguoiMua;
+    
+    select count(MaSach) into BookIdValidate
+    from Sach
+    where book_id=MaSach;
+    if(BookIdValidate=0) then signal sqlstate '45000' set mysql_errno=60005;
+    end if;
+    select SoLuongTonKho into InStock
+	from Sach
+	where book_id=MaSach;
+    
+    select count(*) into Cus_BookValidate
+    from GioHangBaoGom
+    where MaGioHang=cart_id and MaSanPham=book_id;
+    if(Cus_BookValidate!=0) then
+    begin 
+    select SoLuong into InCart
+    from GioHangBaoGom
+    where MaGioHang=cart_id and MaSanPham=book_id;
+    set amount=amount+InCart;
+    end;
+    end if;
+    
+	if(inStock=0 or instock is null) then signal sqlstate '45000' set mysql_errno =60001; 
+    elseif (inStock<amount) then signal sqlstate '45000' set mysql_errno =60002;
+    elseif (amount=0) then signal sqlstate'45000' set mysql_errno= 60003;
+    end if;
+	
+    start transaction;
+
+	if(Cus_BookValidate!=0) then
+		begin 
+		update GioHangBaoGom 
+        set SoLuong=amount 
+        where MaGioHang=cart_id and MaSanPham=book_id;
+		end;
+	else  
+        begin
+		insert into GioHangBaoGom (MaGioHang,MaSanPham,SoLuong)
+		values (cart_id,book_id,amount);
+		end;
+	end if;
+    commit;
+
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `CustomerAdjustingBookInCart` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CustomerAdjustingBookInCart`(in cus_id char(3), in book_id char(3), in new_amount int)
+begin
+	declare cart_id char(3);
+    declare inStock int;
+    declare CustomerIdValidate int default 0;
+    declare BookIdValidate int default 0;
+    declare Cus_BookValidate int default 0;
+   -- -------------------------------------------------------
+	declare exit handler for 60010 -- so luong san pham co san = 0
+	begin
+	rollback;
+	signal sqlstate '45000' set message_text='Product is out of stock';
+	end;
+    
+	declare exit handler for 60011 -- so luong san pham co san < so luong san pham lua chon
+    begin
+    signal sqlstate '45000' set message_text='the selected amount of products is greater than stock';
+    end;
+    
+	declare exit handler for 60012 -- so luong san pham lua chon<1
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='the selected amount of  product is invalid';
+    end;
+    
+    declare exit handler for 60013 -- ma id nguoi mua ko ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='customer id is invalid';
+    end;
+    
+    declare exit handler for 60014 -- ma id sach ko ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='book id is invalid';
+    end;
+    
+    declare exit handler for 60015 -- khong ton tai quan he cus-book
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='book has not been add to customer cart';
+    end;
+	-- -------------------------------------------------------
+    select count(MaNguoiMua) into CustomerIdValidate
+    from NguoiMua
+    where MaNguoiMua=cus_id;
+    if(CustomerIdValidate=0) then signal sqlstate '45000' set mysql_errno=60013;
+    else 
+		begin
+		select MaGioHang into cart_id
+		from NguoiMua
+		where MaNguoiMua=cus_id;
+		end;
+	end if;
+    
+    select count(MaSach) into BookIdValidate
+    from Sach
+    where MaSach=book_id;
+    if(BookIdValidate=0) then signal sqlstate '45000' set mysql_errno=60014;
+    end if;
+    
+    select count(*) into Cus_BookValidate
+    from GioHangBaoGom
+    where MaGioHang=cart_id and MaSanPham=book_id;
+    if(Cus_BookValidate=0) then signal sqlstate '45000' set mysql_errno=60015;
+    end if;
+    
+	select SoLuongTonKho into inStock
+	from Sach
+	where MaSach=book_id;
+	if(inStock=0 or instock is null) then signal sqlstate '45000' set mysql_errno=60010;
+    elseif (inStock<new_amount) then signal sqlstate '45000' set mysql_errno=60011;
+    elseif (new_amount<0) then signal sqlstate '45000' set mysql_errno=60012;
+    end if;
+
+    start transaction;
+    if (new_amount=0) then
+		begin
+		delete from GioHangBaoGom where MaGioHang=cart_id and MaSanPham=book_id;
+		end;
+	else
+		begin
+		update GioHangBaoGom
+		set Soluong=new_amount
+		where MaGioHang=cus_id and MaSanPham=book_id;
+		end;
+	end if;
+    commit;
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `CustomerRemovingBookFromCart` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CustomerRemovingBookFromCart`(in cus_id char(3), in book_id char(3))
+begin
+	declare cart_id char(3);
+    declare CustomerIdValidate int default 0;
+    declare BookIdValidate int default 0;
+    declare Cus_BookValidate int default 0;
+    -- -------------------------------------------------------
+	declare exit handler for 60006 -- id nguoi mua khong ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='customer id is invalid';
+    end;
+    
+    declare exit handler for 60007 -- id sach  khong ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='book id is invalid';
+    end;
+    
+    declare exit handler for 60008 -- khong ton tai (nguoi mua-sach)
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='book has not been add to customer cart';
+    end;
+    -- -------------------------------------------------------
+    select count(MaNguoiMua) into CustomerIdValidate
+    from NguoiMua
+    where MaNguoiMua=cus_id;
+    if(CustomerIdValidate=0) then signal sqlstate '45000' set mysql_errno=60006;
+    else 
+		begin
+		select MaGioHang into cart_id
+		from NguoiMua
+		where MaNguoiMua=cus_id;
+		end;
+	end if;
+    
+    select count(MaSach) into BookIdValidate
+    from Sach
+    where MaSach=book_id;
+    if(BookIdValidate=0) then signal sqlstate '45000' set mysql_errno=60007;
+    end if;
+    
+    
+    select count(*) into Cus_BookValidate
+    from GioHangBaoGom
+    where MaGioHang=cart_id and MaSanPham=book_id;
+    if(Cus_BookValidate=0) then signal sqlstate '45000' set mysql_errno=60008;
+    end if;
+    
+    start transaction;
+    delete from GioHangBaoGom where MaGioHang=cart_id and MaSanPham=book_id;
+    commit;
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `DropOrder` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `DropOrder`(in cus_id char(3))
+begin
+    declare CustomerIdValidate int default 0;
+    declare Cus_OrderValidate int default 0;
+   -- -------------------------------------------------------   
+    declare exit handler for 60020 -- ma id nguoi mua ko ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='customer id is invalid';
+    end;
+    declare exit handler for 60021 -- relationship nguoimua_donhang khong ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='customer has not ordered';
+    end;
+	-- -------------------------------------------------------
+    select count(MaNguoiMua) into CustomerIdValidate
+    from NguoiMua
+    where MaNguoiMua=cus_id;
+    if(CustomerIdValidate=0) then signal sqlstate '45000' set mysql_errno=60020;
+	end if;
+    
+    select count(MaNguoiMua) into Cus_OrderValidate
+    from DonHang
+    where MaNguoiMua=cus_id;
+    if(Cus_OrderValidate=0) then signal sqlstate '45000' set mysql_errno=60021;
+	end if;
+    
+	start transaction;
+    delete from DonHang where MaNguoiMua=cus_id; 
+    commit;
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `RemovingBookOutOfCartAfterPurchasing` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `RemovingBookOutOfCartAfterPurchasing`(in cus_id char(3), in book_id char(3))
+begin
+	declare cart_id char(3);
+    declare amount int;
+    declare CustomerIdValidate int default 0;
+    declare BookIdValidate int default 0;
+    declare Cus_BookValidate int default 0;
+   -- -------------------------------------------------------   
+    declare exit handler for 60016 -- ma id nguoi mua ko ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='customer id is invalid';
+    end;
+    
+    declare exit handler for 60017 -- ma id sach ko ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='book id is invalid';
+    end;
+    
+    declare exit handler for 60018 -- khong ton tai quan he cus-book
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='book has not been add to customer cart';
+    end;
+	-- -------------------------------------------------------
+    select count(MaNguoiMua) into CustomerIdValidate
+    from NguoiMua
+    where MaNguoiMua=cus_id;
+    if(CustomerIdValidate=0) then signal sqlstate '45000' set mysql_errno=60013;
+    else 
+		begin
+		select MaGioHang into cart_id
+		from NguoiMua
+		where MaNguoiMua=cus_id;
+		end;
+	end if;
+    
+    select count(MaSach) into BookIdValidate
+    from Sach
+    where MaSach=book_id;
+    if(BookIdValidate=0) then signal sqlstate '45000' set mysql_errno=60014;
+    end if;
+    
+    select count(*) into Cus_BookValidate
+    from GioHangBaoGom
+    where MaGioHang=cart_id and MaSanPham=book_id;
+    if(Cus_BookValidate=0) then signal sqlstate '45000' set mysql_errno=60015;
+    else
+    begin
+    select SoLuong into amount
+    from GioHangBaoGom
+    where MaGioHang=cart_id and MaSanPham=book_id;
+    end;
+    end if;
+    
+	start transaction;
+    delete from GioHangBaoGom 
+    where MaGioHang=cus_id and MaSanPham=book_id;
+    
+    update Sach
+    set SoLuongTonKho=SoLuongTonKho-amount
+    where MaSach=book_id;
+    commit;
+    
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -638,4 +1374,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-22 15:37:55
+-- Dump completed on 2025-11-22 21:37:16
