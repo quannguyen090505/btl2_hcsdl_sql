@@ -835,10 +835,6 @@ INSERT INTO `voucher` VALUES ('006',50000),('007',100000),('008',25000),('009',1
 UNLOCK TABLES;
 
 --
--- Dumping events for database 'btl2_hcsdl'
---
-
---
 -- Dumping routines for database 'btl2_hcsdl'
 --
 /*!50003 DROP PROCEDURE IF EXISTS `AddCategory` */;
@@ -1516,6 +1512,53 @@ begin
     end if;
     start transaction;
     update Sach set NamXuatBan=nam where MaSach=book_id;
+    commit;
+end ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `AdjustWriter` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AdjustWriter`(in book_id char(3), in writer_id char(3))
+begin
+    declare BookIdValidate int default 0;
+    declare WriterIdValidate int default 0;
+    -- -------------------------------------------------------
+    declare exit handler for 60023 -- id sach  khong ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='book id is invalid';
+    end;
+	declare exit handler for 60024 -- id tac gia  khong ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='writer id is invalid';
+    end;
+   -- -------------------------------------------------------
+    select count(*) into BookIdValidate
+    from Sach
+    where MaSach=book_id;
+    if(BookIdValidate=0) then signal sqlstate '45000' set mysql_errno=60023;
+    end if;
+    select count(*) into WriterIdValidate
+    from TacGia
+    where MaTacGia=writer_id;
+    if(WriterIdValidate=0) then signal sqlstate '45000' set mysql_errno=60024;
+    end if;
+    start transaction;
+    update DuocVietBoi
+    set MaTachGia=writer_id
+    where MaSach=book_id;
     commit;
 end ;;
 DELIMITER ;
@@ -2328,4 +2371,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-24 11:15:33
+-- Dump completed on 2025-11-24 11:22:23
