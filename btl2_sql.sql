@@ -92,9 +92,31 @@ CREATE TABLE `danhgia` (
 
 LOCK TABLES `danhgia` WRITE;
 /*!40000 ALTER TABLE `danhgia` DISABLE KEYS */;
-INSERT INTO `danhgia` VALUES ('006','001','noi dung sach tot','2024-05-18',5),('006','010','bo ich','2024-11-20',5),('007','002','tot','2025-01-30',5),('008','006','dang mua','2025-08-11',5),('008','007','hay','2023-02-28',5),('010','008','day du','2023-09-05',5);
+INSERT INTO `danhgia` VALUES ('006','001','noi dung sach tot','2025-11-23',5),('006','002','sach tot','2025-11-23',5),('006','003','noi dung sach hay','2025-11-23',5),('006','009','bo ich','2025-11-28',5),('006','010','bo ich','2025-11-28',5),('007','002','tot','2025-11-25',4),('008','004','hay','2025-11-28',5),('008','005','dang mua','2025-11-26',5);
 /*!40000 ALTER TABLE `danhgia` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `RatingBook` BEFORE INSERT ON `danhgia` FOR EACH ROW begin
+	declare validate int default 0;
+	select count(*) into validate
+    from (NguoiMua as ngm join Donhang as dh on ngm.MaNguoiMua=dh.MaNguoiMua) join DonHangBaoGom as dhbg on dh.MaDonHang=dhbg.MaDonHang
+    where ngm.MaNguoiMua=new.MaNguoiMua and dhbg.MaSach=new.MaSach and dh.TrangThai='checked out';
+    if(validate=0) then signal sqlstate '45000' set message_text='customer has not bought book';
+    end if;
+end */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `diachi`
@@ -151,9 +173,36 @@ CREATE TABLE `donhang` (
 
 LOCK TABLES `donhang` WRITE;
 /*!40000 ALTER TABLE `donhang` DISABLE KEYS */;
-INSERT INTO `donhang` VALUES ('001','006','2025-11-22','Checked out','cash',220000,'005',198000),('002','009','2025-11-23','Waiting for checkout','Waiting for checkout',100000,NULL,0),('003','010','2025-11-25','Waiting for checkout','Waiting for checkout',385000,NULL,0),('004','007','2025-11-25','checked out','cash',80000,'002',72000),('005','008','2025-11-25','checked out','banking',600000,'007',500000),('006','007','2025-11-26','Waiting for checkout','Waiting for checkout',65000,NULL,NULL),('007','006','2025-11-27','checked out','banking',105000,'008',80000),('008','008','2025-11-27','checked out','banking',475000,'006',425000);
+INSERT INTO `donhang` VALUES ('001','006','2025-11-22','Checked out','cash',220000,'005',198000),('002','009','2025-11-23','Waiting for checkout','Waiting for checkout',100000,NULL,0),('003','010','2025-11-25','Waiting for checkout','Waiting for checkout',385000,NULL,0),('004','007','2025-11-25','checked out','cash',80000,'002',72000),('005','008','2025-11-25','checked out','banking',600000,'007',500000),('006','007','2025-11-26','Waiting for checkout','Waiting for checkout',65000,NULL,NULL),('007','006','2025-11-27','checked out','banking',105000,'008',80000),('008','008','2025-11-27','checked out','banking',475000,'008',450000);
 /*!40000 ALTER TABLE `donhang` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `createOrder` BEFORE INSERT ON `donhang` FOR EACH ROW begin
+	declare validate int default 0;
+	declare cart_id int default 0;
+    
+    select MaGioHang into cart_id
+	from NguoiMua 
+    where MaNguoiMua=new.MaNguoiMua;
+	select count(*) into validate
+	from GioHangBaoGom 
+	where MaGioHang=cart_id;
+	if(validate=0) then signal sqlstate '45000' set message_text='customer cart is empty';
+     end if;
+end */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -169,8 +218,53 @@ DELIMITER ;;
 	select count(*) into checking
     from DonHang
     where MaNguoiMua=new.MaNguoiMua and TrangThai='Waiting for checkout'
-    order by MaDonHang desc;
+    order by MaDonHang desc
+    limit 1;
     if(checking!=0) then signal sqlstate '45000' set message_text='customer is checking out multi order at the same time';
+    end if;
+end */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `UsingDiscount` BEFORE INSERT ON `donhang` FOR EACH ROW begin
+	declare discount_date date;
+	select ThoiHanSD into discount_date
+	from PhieuGiamGia
+	where MaGiamGia=new.MaGiamGia;
+	if(new.NgayTaoDon>discount_date) then signal sqlstate '45000' set message_text=' the discount is out of date';
+    end if;
+end */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `UsingDiscount1` BEFORE INSERT ON `donhang` FOR EACH ROW begin
+	declare discount_request int;
+	select YeuCauToiThieu into discount_request
+	from PhieuGiamGia
+	where MaGiamGia=new.MaGiamGia;
+	if(new.TongGia<discount_request) then signal sqlstate '45000' set message_text=' the price doesnt meet the condition of discout';
     end if;
 end */;;
 DELIMITER ;
@@ -483,15 +577,161 @@ UNLOCK TABLES;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `AmountOfProductInCart` BEFORE INSERT ON `giohangbaogom` FOR EACH ROW begin
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `InsertingCart1` BEFORE INSERT ON `giohangbaogom` FOR EACH ROW BEGIN
 	declare amount int default 0;
-    
 	select SUM(SoLuong) into amount
     from GioHangBaoGom
     where MaGioHang=new.MaGioHang;
-    if(amount+new.SoLuong>1000) then signal sqlstate '45000' set message_text='the amount of book in customer cart is overflow';
+    if(amount+new.SoLuong>1000) then signal sqlstate '45000' set message_text='the amount of book in cart is overflow';
     end if;
-end */;;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `InsertingCart2` BEFORE INSERT ON `giohangbaogom` FOR EACH ROW BEGIN
+	declare inSotck int default 0;
+	select SoLuong into inSotck
+    from Sach
+    where MaSach=new.MaSanPham;
+    if(inStock<new.SoLuong) then signal sqlstate '45000' set message_text='the selected amount is greater than stock';
+    end if;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `InsertingCart3` BEFORE INSERT ON `giohangbaogom` FOR EACH ROW BEGIN
+    if(new.SoLuong<=0) then signal sqlstate '45000' set message_text='the selected amount is invalid';
+    end if;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `InsertingCart4` BEFORE INSERT ON `giohangbaogom` FOR EACH ROW BEGIN
+	declare inSotck int default 0;
+	select SoLuong into inSotck
+    from Sach
+    where MaSach=new.MaSanPham;
+    if(inStock<1) then signal sqlstate '45000' set message_text='the book is out of stock';
+    end if;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `UpdatingCart1` BEFORE UPDATE ON `giohangbaogom` FOR EACH ROW BEGIN
+    declare inStock int default 0;
+    select SoLuongTonKho into inStock
+    from Sach
+    where MaSach=new.MaSanPham;
+    if(new.SoLuong>inStock)then signal sqlstate '45000' set message_text='the selected amount is greater than stock';
+    end if;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `UpdatingCart2` BEFORE UPDATE ON `giohangbaogom` FOR EACH ROW BEGIN
+    if(new.SoLuong<0) then signal sqlstate '45000' set message_text='the updated amount is invalid';
+    end if;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `UpdatingCart3` BEFORE UPDATE ON `giohangbaogom` FOR EACH ROW BEGIN
+	declare amount int default 0;
+   
+	select SUM(SoLuong) into amount
+    from GioHangBaoGom
+    where MaGioHang=new.MaGioHang and MaSanPham!=New.MaSanPham;
+    if(amount+new.SoLuong>1000) then signal sqlstate '45000' set message_text='the amount of book in cart is overflow';
+    end if;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `UpdatingCart4` BEFORE UPDATE ON `giohangbaogom` FOR EACH ROW BEGIN
+	declare inSotck int default 0;
+	select SoLuong into inSotck
+    from Sach
+    where MaSach=new.MaSanPham;
+    if(inStock<1) then signal sqlstate '45000' set message_text='the book is out of stock';
+    end if;
+END */;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -611,7 +851,7 @@ CREATE TABLE `nguoimua` (
 
 LOCK TABLES `nguoimua` WRITE;
 /*!40000 ALTER TABLE `nguoimua` DISABLE KEYS */;
-INSERT INTO `nguoimua` VALUES ('000','000'),('006','006'),('007','007'),('008','008'),('009','009'),('010','010');
+INSERT INTO `nguoimua` VALUES ('000','000'),('006','006'),('007','007'),('008','008'),('009','009'),('010','010'),('011','011');
 /*!40000 ALTER TABLE `nguoimua` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -668,6 +908,42 @@ LOCK TABLES `phanphoi` WRITE;
 INSERT INTO `phanphoi` VALUES ('001','002'),('004','002'),('002','003'),('005','004'),('003','005');
 /*!40000 ALTER TABLE `phanphoi` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `supplier` BEFORE INSERT ON `phanphoi` FOR EACH ROW begin
+	if(new.MaChiNhanhGui=new.MaChiNhanhNhan) then signal sqlstate '45000' set message_text=' id of both agencies are the same';
+    end if;
+end */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `supplier1` BEFORE UPDATE ON `phanphoi` FOR EACH ROW begin
+	if(new.MaChiNhanhGui=new.MaChiNhanhNhan) then signal sqlstate '45000' set message_text=' id of both agencies are the same';
+    end if;
+end */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `phieugiamgia`
@@ -694,6 +970,24 @@ LOCK TABLES `phieugiamgia` WRITE;
 INSERT INTO `phieugiamgia` VALUES ('001','100000','2025-11-24',50),('002','50000','2025-11-30',19),('003','10000','2025-12-12',100),('004','20000','2026-01-20',5),('005','200000','2025-11-25',4),('006','100000','2025-11-24',4),('007','200000','2025-12-25',4),('008','50000','2025-11-30',19),('009','20000','2025-12-30',50),('010','30000','2026-02-24',50);
 /*!40000 ALTER TABLE `phieugiamgia` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `Discount` BEFORE INSERT ON `phieugiamgia` FOR EACH ROW begin
+	if(new.SoLuong<1) then signal sqlstate '45000' set message_text=' the amount of discount is invalid';
+    end if;
+end */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `sach`
@@ -725,7 +1019,7 @@ CREATE TABLE `sach` (
 
 LOCK TABLES `sach` WRITE;
 /*!40000 ALTER TABLE `sach` DISABLE KEYS */;
-INSERT INTO `sach` VALUES ('001','Giai tich 1','Tieng Viet','','Nxb.DHQG TP.HCM',113,2021,75000,30,'001'),('002','Giai tich 2','Tieng Viet','A','Nxb.DHQG TP.HCM',250,2021,80000,36,'001'),('003','Dai so tuyen tinh','Tieng Viet','Doan Thi Yen','Nxb.DHQG TP.HCM',250,2022,65000,50,'002'),('004','Co so du lieu','Tieng Viet','Le Dinh tu','Nxb.DHQG TP.HCM',700,2025,175000,10,'002'),('005','Discrete mathematic','Tieng Anh',NULL,'Mc  Graw Hill Education',2500,2019,300000,5,'005'),('006','He Thong So','Tieng Viet','Nguyen cao Thang','Nxb.DHQG TP.HCM',300,2020,65000,20,'003'),('007','Cau truc du lieu va Giai thuat','tieng Viet','Nguyen Tuan Anh','Nxb.DHQG TP.HCM',600,2022,70000,20,'002'),('008','Lich su Dang','Tieng Viet','Phan Manh Tuan','Nxb.DHQG TP.HCM',1000,2021,50000,30,'002'),('009','Chu Nghi Xa Hoi Khoa Hoc','Tieng Viet','Nguyen Thi Dinh','Nxb.DHQG TP.HCM',1112,2021,50000,27,'004'),('010','Tu Tuong Ho Chi Minh','Tieng Viet','Le Trong Tien','Nxb.DHQG TP.HCM',1500,2021,55000,35,'004'),('011','Giao Duc Quoc Phong & An ni','tieng viet','nguyen tuan quang','Nxb.DHQG TP.HCM',350,2019,50000,25,'001');
+INSERT INTO `sach` VALUES ('001','Giai tich 1','Tieng Viet','Nguyen Hung Cuong','Nxb.DHQG TP.HCM',113,2021,75000,30,'001'),('002','Giai tich 2','Tieng Viet','A','Nxb.DHQG TP.HCM',250,2021,80000,36,'001'),('003','Dai so tuyen tinh','Tieng Viet','Nguyen Chi Anh','Nxb.DHQG TP.HCM',250,2022,65000,50,'002'),('004','Co so du lieu','Tieng Viet','Le Dinh tu','Nxb.DHQG TP.HCM',700,2025,175000,10,'002'),('005','Discrete mathematic','Tieng Anh',NULL,'Mc  Graw Hill Education',2500,2019,300000,5,'005'),('006','He Thong So','Tieng Viet','Nguyen cao Thang','Nxb.DHQG TP.HCM',300,2020,65000,20,'003'),('007','Cau truc du lieu va Giai thuat','tieng Viet','Nguyen Tuan Anh','Nxb.DHQG TP.HCM',600,2022,70000,20,'002'),('008','Lich su Dang','Tieng Viet','Phan Manh Tuan','Nxb.DHQG TP.HCM',1000,2021,50000,30,'002'),('009','Chu Nghi Xa Hoi Khoa Hoc','Tieng Viet','Nguyen Thi Dinh','Nxb.DHQG TP.HCM',1112,2021,50000,27,'004'),('010','Tu Tuong Ho Chi Minh','Tieng Viet','Le Trong Tien','Nxb.DHQG TP.HCM',1500,2021,55000,35,'004'),('011','Giao Duc Quoc Phong & An ni','tieng viet','nguyen tuan quang','Nxb.DHQG TP.HCM',350,2019,50000,25,'001');
 /*!40000 ALTER TABLE `sach` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -777,7 +1071,7 @@ CREATE TABLE `theloai` (
 
 LOCK TABLES `theloai` WRITE;
 /*!40000 ALTER TABLE `theloai` DISABLE KEYS */;
-INSERT INTO `theloai` VALUES ('001','Khoa hoc May tinh','Mon co so, chuyen nganh cho KHMT'),('002','Chinh tri','Tai lieu, giao trinh cac mon chinh tri'),('003','Dai cuong','Mon hoc dai cuong');
+INSERT INTO `theloai` VALUES ('001','Khoa hoc May tinh','Mon co so, chuyen nganh cho KHMT'),('002','Chinh tri','Tai lieu, giao trinh cac mon chinh tri'),('003','Dai cuong','Mon hoc dai cuong'),('004','Ki Thuat May Tinh','Mon co so, chuyen nganh cho KTMT'),('005','GDQP','Tai lieu danh cho chuong trinh GDQP');
 /*!40000 ALTER TABLE `theloai` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -804,7 +1098,7 @@ CREATE TABLE `thuoctheloai` (
 
 LOCK TABLES `thuoctheloai` WRITE;
 /*!40000 ALTER TABLE `thuoctheloai` DISABLE KEYS */;
-INSERT INTO `thuoctheloai` VALUES ('004','001'),('005','001'),('006','001'),('007','001'),('008','002'),('009','002'),('010','002'),('001','003'),('002','003'),('003','003');
+INSERT INTO `thuoctheloai` VALUES ('004','001'),('005','001'),('006','001'),('007','001'),('008','002'),('009','002'),('010','002'),('001','003'),('002','003'),('003','003'),('011','005');
 /*!40000 ALTER TABLE `thuoctheloai` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -944,6 +1238,87 @@ BEGIN
 
     RETURN total_author_sales;
 END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 DROP PROCEDURE IF EXISTS `AddingBook` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`root`@`localhost` PROCEDURE `AddingBook`(
+in ma_sach char(3),
+in ten_sach varchar(45),
+in ngon_ngu varchar(45),
+in dich_gia varchar(45),
+in ten_nha_xuat_ban varchar(45),
+in so_trang int,
+in nam year,
+in gia int,
+in so_luong int,
+in ma_chi_nhanh char(3)
+)
+begin
+    declare bookIdValidate int default 0;
+    declare AgencyValidate int default 0;
+    declare BookValidate int default 0;
+    -- -------------------------------------------------------
+	declare exit handler for 60001 -- so luong san pham <0
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='the selected amount is invalid';
+    end;
+    declare exit handler for 60002 -- gia cua san pham <0
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='the price of  product is invalid';
+    end;
+    declare exit handler for 60003 -- trung ma san pham
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='the id of product has already exitsted';
+    end;
+     declare exit handler for 60004 -- ma chi nhanh khong ton tai
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='the id of agency is invalid';
+    end;    
+    declare exit handler for 60005 -- san pham da ton tai/ sach co chung ten va chung tac gia
+    begin
+    rollback;
+    signal sqlstate '45000' set message_text='the product has already exitsted';
+    end;
+	-- -------------------------------------------------------
+    if(so_luong<0) then signal sqlstate '45000' set mysql_errno=60001;
+    end if;
+	if(gia<0) then signal sqlstate '45000' set mysql_errno=60002;
+    end if;
+    select count(*) into BookIdValidate
+    from Sach
+    where MaSach=ma_sach;
+    if(BookIdValidate!=0) then signal sqlstate '45000' set mysql_errno=60003;
+    end if;
+    select count(*) into AgencyValidate
+    from ChiNhanh
+    where MaChiNhanh=ma_chi_nhanh;
+    if(AgencyValidate=0) then signal sqlstate '45000' set mysql_errno=60004;
+    end if;
+    select count(*) into BookValidate
+    from (Sach natural join DuocVietBoi) natural join TacGia
+    where TenSach=ten_sach and TenTacGia=ten_tac_gia;
+    if(BookValidate!=0)then signal sqlstate '45000' set mysql_errno=60005;
+    end if;
+	start transaction;
+    insert into Sach values (ma_sach,ten_sach,Ngon_ngu,dich_gia,ten_nha_xuat_ban,so_trang,nam,so_luong, ma_chi_nhanh);
+    commit;
+end ;;
 DELIMITER ;
 /*!50003 SET sql_mode              = @saved_sql_mode */ ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
@@ -2398,4 +2773,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-26  1:51:22
+-- Dump completed on 2025-11-26 17:31:41
