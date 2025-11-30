@@ -139,7 +139,7 @@ CREATE TABLE `diachi` (
 
 LOCK TABLES `diachi` WRITE;
 /*!40000 ALTER TABLE `diachi` DISABLE KEYS */;
-INSERT INTO `diachi` VALUES ('006','10 Ly Thuong Kiet, Quan 10,HCM'),('007','12 Hai Ba Trung, Quan 7,HCM'),('008','116 Quang Trung, Quan Hoan  Kiem,Ha Noi'),('009','234/7 Dinh Tien Hoang, Quan Dong Dam Ha Noi'),('010','47 Mac Dinh Chi, Da Nang');
+INSERT INTO `diachi` VALUES ('006','10 Ly Thuong Kiet, Quan 10,HCM'),('007','12 Hai Ba Trung, Quan 7,HCM'),('008','116 Quang Trung, Quan Hoan  Kiem,Ha Noi'),('009','234/7 Dinh Tien Hoang, Quan Dong Dam Ha Noi'),('010','47 Mac Dinh Chi, Da Nang'),('016','14  Nguyen Xien, Thu Duc, HCM'),('017','237 Hai Ba Trung, Quan Ba Dinh, Ha Noi'),('018','23/7 Huynh Van Banh, Quan 1, HCM');
 /*!40000 ALTER TABLE `diachi` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -173,36 +173,9 @@ CREATE TABLE `donhang` (
 
 LOCK TABLES `donhang` WRITE;
 /*!40000 ALTER TABLE `donhang` DISABLE KEYS */;
-INSERT INTO `donhang` VALUES ('001','006','2025-11-22','Checked out','cash',220000,'005',198000),('002','009','2025-11-23','Waiting for checkout','Waiting for checkout',100000,NULL,0),('003','010','2025-11-25','Waiting for checkout','Waiting for checkout',385000,NULL,0),('004','007','2025-11-25','checked out','cash',80000,'002',72000),('005','008','2025-11-25','checked out','banking',600000,'007',500000),('006','007','2025-11-26','Waiting for checkout','Waiting for checkout',65000,NULL,NULL),('007','006','2025-11-27','checked out','banking',105000,'008',80000),('008','008','2025-11-27','checked out','banking',475000,'008',450000);
+INSERT INTO `donhang` VALUES ('001','006','2025-11-22','Checked out','cash',220000,'005',198000),('002','009','2025-11-23','Waiting for checkout','Waiting for checkout',100000,NULL,0),('003','010','2025-11-25','Waiting for checkout','Waiting for checkout',385000,NULL,0),('004','007','2025-11-25','checked out','cash',80000,'002',72000),('005','008','2025-11-25','checked out','banking',600000,'007',500000),('006','007','2025-11-26','Waiting for checkout','Waiting for checkout',65000,NULL,NULL),('007','006','2025-11-27','checked out','banking',105000,'008',80000),('008','008','2025-11-27','checked out','banking',475000,'008',450000),('009','016','2025-11-29','checked out','cash',67000,'003',62000),('010','018','2025-11-30','checked out','cash',50000,'010',30000);
 /*!40000 ALTER TABLE `donhang` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `createOrder` BEFORE INSERT ON `donhang` FOR EACH ROW begin
-	declare validate int default 0;
-	declare cart_id int default 0;
-    
-    select MaGioHang into cart_id
-	from NguoiMua 
-    where MaNguoiMua=new.MaNguoiMua;
-	select count(*) into validate
-	from GioHangBaoGom 
-	where MaGioHang=cart_id;
-	if(validate=0) then signal sqlstate '45000' set message_text='customer cart is empty';
-     end if;
-end */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
@@ -272,6 +245,33 @@ DELIMITER ;
 /*!50003 SET character_set_client  = @saved_cs_client */ ;
 /*!50003 SET character_set_results = @saved_cs_results */ ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `createOrder` BEFORE INSERT ON `donhang` FOR EACH ROW begin
+	declare validate int default 0;
+	declare cart_id int default 0;
+    
+    select MaGioHang into cart_id
+	from NguoiMua 
+    where MaNguoiMua=new.MaNguoiMua;
+	select count(*) into validate
+	from GioHangBaoGom 
+	where MaGioHang=cart_id;
+	if(validate=0) then signal sqlstate '45000' set message_text='customer cart is empty';
+     end if;
+end */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Table structure for table `donhangbaogom`
@@ -298,7 +298,7 @@ CREATE TABLE `donhangbaogom` (
 
 LOCK TABLES `donhangbaogom` WRITE;
 /*!40000 ALTER TABLE `donhangbaogom` DISABLE KEYS */;
-INSERT INTO `donhangbaogom` VALUES ('001','001',1,75000),('001','002',1,80000),('001','003',1,65000),('002','008',1,50000),('002','009',1,50000),('003','010',7,385000),('004','002',1,80000),('005','005',2,300000),('006','003',1,65000),('007','009',1,50000),('007','010',1,55000),('008','004',1,175000),('008','005',1,300000);
+INSERT INTO `donhangbaogom` VALUES ('001','001',1,75000),('001','002',1,80000),('001','003',1,65000),('002','008',1,50000),('002','009',1,50000),('003','010',7,385000),('004','002',1,80000),('005','005',2,300000),('006','003',1,65000),('007','009',1,50000),('007','010',1,55000),('008','004',1,175000),('008','005',1,300000),('009','019',1,67000),('010','018',1,50000);
 /*!40000 ALTER TABLE `donhangbaogom` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -423,7 +423,7 @@ CREATE TABLE `donvanchuyen` (
 
 LOCK TABLES `donvanchuyen` WRITE;
 /*!40000 ALTER TABLE `donvanchuyen` DISABLE KEYS */;
-INSERT INTO `donvanchuyen` VALUES ('000','001','10 Ly Thuong Kiet, Quan 10,HCM','2025-11-22','2025-11-23','Delivered'),('001','005','116 Quang Trung, Quan Hoan  Kiem,Ha Noi','2025-11-25',NULL,'Delivering'),('002','004','12 Hai Ba Trung, Quan 7,HCM','2025-11-26','2025-11-27','Delivered'),('003','007','10 Ly Thuong Kiet, Quan 10,HCM','2025-11-27','2025-11-28','Delivered'),('004','008','116 Quang Trung, Quan Hoan  Kiem,Ha Noi','2025-11-27',NULL,'Delivering');
+INSERT INTO `donvanchuyen` VALUES ('000','001','10 Ly Thuong Kiet, Quan 10,HCM','2025-11-22','2025-11-23','Delivered'),('001','005','116 Quang Trung, Quan Hoan  Kiem,Ha Noi','2025-11-25','2025-11-27','Delivered'),('002','004','12 Hai Ba Trung, Quan 7,HCM','2025-11-26','2025-11-27','Delivered'),('003','007','10 Ly Thuong Kiet, Quan 10,HCM','2025-11-27','2025-11-28','Delivered'),('004','008','116 Quang Trung, Quan Hoan  Kiem,Ha Noi','2025-11-27','2025-11-29','Delivered'),('005','009','14  Nguyen Xien, Thu Duc, HCM','2025-11-29','2025-11-30','Delivered'),('006','010','23/7 Huynh Van Banh, Quan 1, HCM','2025-11-30','2025-12-01','Delivered');
 /*!40000 ALTER TABLE `donvanchuyen` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -565,7 +565,7 @@ CREATE TABLE `giohangbaogom` (
 
 LOCK TABLES `giohangbaogom` WRITE;
 /*!40000 ALTER TABLE `giohangbaogom` DISABLE KEYS */;
-INSERT INTO `giohangbaogom` VALUES ('006','008',1),('007','005',7),('007','009',7),('008','002',5),('009','008',2),('009','010',2),('010','007',7);
+INSERT INTO `giohangbaogom` VALUES ('006','008',NULL),('007','005',NULL),('007','009',NULL),('008','002',NULL),('009','008',NULL),('009','010',NULL),('010','007',NULL);
 /*!40000 ALTER TABLE `giohangbaogom` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -1018,7 +1018,7 @@ CREATE TABLE `sach` (
 
 LOCK TABLES `sach` WRITE;
 /*!40000 ALTER TABLE `sach` DISABLE KEYS */;
-INSERT INTO `sach` VALUES ('001','Giai Tich 1','Tieng Viet','Nguyen Hung Cuong','Nxb.DHQG TP.HCM',200,2021,75000,30,'001'),('002','Giai tich 2','Tieng Viet','Le Bao Dien','Nxb.DHQG TP.HCM',250,2021,80000,36,'001'),('003','Dai so tuyen tinh','Tieng Viet','Nguyen Chi Anh','Nxb.DHQG TP.HCM',250,2022,65000,50,'002'),('004','Co so du lieu','Tieng Viet','Le Dinh tu','Nxb.DHQG TP.HCM',700,2025,175000,10,'002'),('005','Discrete mathematic','Tieng Anh',NULL,'Mc  Graw Hill Education',2500,2019,300000,5,'005'),('006','He Thong So','Tieng Viet','Nguyen cao Thang','Nxb.DHQG TP.HCM',300,2020,65000,20,'003'),('007','Cau truc du lieu va Giai thuat','tieng Viet','Nguyen Tuan Anh','Nxb.DHQG TP.HCM',600,2022,70000,20,'002'),('008','Lich su Dang','Tieng Viet','Phan Manh Tuan','Nxb Chinh Tri Quoc Gia Su That',1000,2021,50000,30,'002'),('009','Chu Nghi Xa Hoi Khoa Hoc','Tieng Viet','Nguyen Thi Dinh','Nxb Chinh Tri Quoc Gia Su That',1112,2021,50000,27,'004'),('010','Tu Tuong Ho Chi Minh','Tieng Viet','Le Trong Tien','Nxb Chinh Tri Quoc Gia Su That',1500,2021,55000,35,'004'),('011','Giao Duc Quoc Phong & An ni','Tieng Viet','Nguyen Tuan Quang','Nxb Chinh Tri Quoc Gia Su That',350,2019,50000,25,'001'),('012','Hoa Dai Cuong','Tieng Viet','Nguyen Thi Thuy','Nxb.DHQG TP.HCM',150,2022,65000,25,'002'),('013','Vat Ly 1','Tieng Viet','Tran Hai Dang','Nxb.DHQG TP.HCM',250,2022,62000,20,'002'),('014','Mathematical Logic for Computer Science','Tieng Anh','M. Ben-Ari','Department of Science Teaching',360,2012,325000,15,'005'),('015','A First Course in Mathematical Modeling','Tieng Anh','Frank R. Giordano William P. Fox','Brooks/Cole, Cengage Learning',800,2013,500000,12,'004'),('016','Tam Ly Hoc Dai Cuong','Tieng Viet','Le Thi Hong','Nxb.DHQG TP HN',400,2020,45000,34,'002'),('017','Co Nhiet Hoc Dai Cuong','Tieng Viet','Nguyen Sinh Huy','Nxb.DHQG TP HN',350,2022,45000,42,'004'),('018','Kinh Te Vi Mo','Tieng Viet','Nguyen Thu Thuy','Nxb.DHQG TP HN',300,2023,50000,51,'005'),('019','Tim Mach Hoc','Tieng Viet','Truong Son Kim','Nxb.Y Hoc',500,2024,67000,52,'005'),('020','Suc Ben Vat Lieu','Tieng Viet','Nguyen Son Hai','Nxb.DHQG TP.HCM',450,2024,60000,46,'001');
+INSERT INTO `sach` VALUES ('001','Giai Tich 1','Tieng Viet','Nguyen Hung Cuong','Nxb.DHQG TP.HCM',200,2021,75000,30,'001'),('002','Giai tich 2','Tieng Viet','Le Bao Dien','Nxb.DHQG TP.HCM',250,2021,80000,36,'001'),('003','Dai so tuyen tinh','Tieng Viet','Nguyen Chi Anh','Nxb.DHQG TP.HCM',250,2022,65000,50,'002'),('004','Co so du lieu','Tieng Viet','Le Dinh tu','Nxb.DHQG TP.HCM',700,2025,175000,10,'002'),('005','Discrete mathematic','Tieng Anh','Kenneth H. Rosen','Mc  Graw Hill Education',2500,2019,300000,5,'005'),('006','He Thong So','Tieng Viet','Nguyen cao Thang','Nxb.DHQG TP.HCM',300,2020,65000,20,'003'),('007','Cau truc du lieu va Giai thuat','tieng Viet','Nguyen Tuan Anh','Nxb.DHQG TP.HCM',600,2022,70000,20,'002'),('008','Lich su Dang','Tieng Viet','Phan Manh Tuan','Nxb Chinh Tri Quoc Gia Su That',1000,2021,50000,30,'002'),('009','Chu Nghi Xa Hoi Khoa Hoc','Tieng Viet','Nguyen Thi Dinh','Nxb Chinh Tri Quoc Gia Su That',1112,2021,50000,27,'004'),('010','Tu Tuong Ho Chi Minh','Tieng Viet','Le Trong Tien','Nxb Chinh Tri Quoc Gia Su That',1500,2021,55000,35,'004'),('011','Giao Duc Quoc Phong & An ni','Tieng Viet','Nguyen Tuan Quang','Nxb Chinh Tri Quoc Gia Su That',350,2019,50000,25,'001'),('012','Hoa Dai Cuong','Tieng Viet','Nguyen Thi Thuy','Nxb.DHQG TP.HCM',150,2022,65000,25,'002'),('013','Vat Ly 1','Tieng Viet','Tran Hai Dang','Nxb.DHQG TP.HCM',250,2022,62000,20,'002'),('014','Mathematical Logic for Computer Science','Tieng Anh','M. Ben-Ari','Department of Science Teaching',360,2012,325000,15,'005'),('015','A First Course in Mathematical Modeling','Tieng Anh','Frank R. Giordano William P. Fox','Brooks/Cole, Cengage Learning',800,2013,500000,12,'004'),('016','Tam Ly Hoc Dai Cuong','Tieng Viet','Le Thi Hong','Nxb.DHQG TP HN',400,2020,45000,34,'002'),('017','Co Nhiet Hoc Dai Cuong','Tieng Viet','Nguyen Sinh Huy','Nxb.DHQG TP HN',350,2022,45000,42,'004'),('018','Kinh Te Vi Mo','Tieng Viet','Nguyen Thu Thuy','Nxb.DHQG TP HN',300,2023,50000,51,'005'),('019','Tim Mach Hoc','Tieng Viet','Truong Son Kim','Nxb.Y Hoc',500,2024,67000,52,'005'),('020','Suc Ben Vat Lieu','Tieng Viet','Nguyen Son Hai','Nxb.DHQG TP.HCM',450,2024,60000,46,'001');
 /*!40000 ALTER TABLE `sach` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1628,40 +1628,6 @@ begin
     update DuocVietBoi
     set MaTachGia=writer_id
     where MaSach=book_id;
-    commit;
-end ;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 DROP PROCEDURE IF EXISTS `AdjustingBookTranslator` */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
-DELIMITER ;;
-CREATE DEFINER=`root`@`localhost` PROCEDURE `AdjustingBookTranslator`(in book_id char(3), in dich_gia varchar(45))
-begin
-    declare BookIdValidate int default 0;
-   -- -------------------------------------------------------
-    declare exit handler for 60017 -- ma id sach ko ton tai
-    begin
-    rollback;
-    signal sqlstate '45000' set message_text='book id is invalid';
-    end;
-    -- -------------------------------------------------------
-	select count(*) into BookIdValidate
-    from Sach
-    where MaSach=book_id;
-    if(BookIdValidate=0) then signal sqlstate '45000' set mysql_errno=60017;
-    end if;
-    start transaction;
-    update Sach set DichGia=dich_gia where MaSach=book_id;
     commit;
 end ;;
 DELIMITER ;
@@ -2394,4 +2360,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-30 17:38:25
+-- Dump completed on 2025-11-30 22:02:04
