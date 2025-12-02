@@ -1,3 +1,5 @@
+CREATE DATABASE  IF NOT EXISTS `btl2_hcsdl` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `btl2_hcsdl`;
 -- MySQL dump 10.13  Distrib 8.0.44, for Win64 (x86_64)
 --
 -- Host: 127.0.0.1    Database: btl2_hcsdl
@@ -563,7 +565,7 @@ CREATE TABLE `giohangbaogom` (
 
 LOCK TABLES `giohangbaogom` WRITE;
 /*!40000 ALTER TABLE `giohangbaogom` DISABLE KEYS */;
-INSERT INTO `giohangbaogom` VALUES ('006','008',NULL),('007','005',NULL),('007','009',NULL),('008','002',NULL),('009','008',NULL),('009','010',NULL),('010','007',NULL);
+INSERT INTO `giohangbaogom` VALUES ('006','008',1),('007','005',5),('007','009',7),('008','002',7),('009','008',2),('009','010',2),('010','007',5);
 /*!40000 ALTER TABLE `giohangbaogom` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
