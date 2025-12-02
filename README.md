@@ -1,16 +1,60 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+````markdown
+# 📚 Web Bán Sách (Book Store App)
 
-Currently, two official plugins are available:
+Dự án website thương mại điện tử bán sách full-stack, được xây dựng với mục tiêu cung cấp trải nghiệm mua sắm nhanh chóng và quản lý sách hiệu quả.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🛠 Công nghệ sử dụng
 
-## React Compiler
+* **Backend:** Java, Spring Boot (Spring Data JPA, Spring Security).
+* **Frontend:** ReactJS (Axios, React Router).
+* **Database:** MySQL.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🚀 Hướng dẫn cài đặt & Chạy ứng dụng
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 1. Yêu cầu hệ thống (Prerequisites)
+* Java Development Kit (JDK) 17 trở lên.
+* Node.js & npm.
+* MySQL Server.
+
+### 2. Cấu hình Database
+1.  Mở MySQL và tạo một database mới (ví dụ: `bookstore_db`).
+2.  Mở file `src/main/resources/application.properties` trong thư mục Backend và cập nhật thông tin:
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/bookstore_db
+spring.datasource.username=root
+spring.datasource.password=your_password
+spring.jpa.hibernate.ddl-auto=update
+````
+
+### 3\. Chạy Backend (Spring Boot)
+
+
+```bash
+# Cài đặt dependencies
+./mvn clean install
+
+# Chạy ứng dụng
+./mvn spring-boot:run
+```
+
+*Backend sẽ chạy tại: `http://localhost:8080`*
+
+### 4\. Chạy Frontend (ReactJS)
+
+
+```bash
+# Cài đặt node modules
+npm install
+
+# Chạy ứng dụng
+npm run dev
+
+```
+
+*Frontend sẽ chạy tại: `http://localhost:5173`*
+
+-----
